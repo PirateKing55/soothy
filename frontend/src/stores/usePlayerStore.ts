@@ -5,6 +5,7 @@ import { useChatStore } from "./useChatStore";
 interface PlayerStore {
   currentSong: Song | null;
   isPlaying: boolean;
+  isOnRepeat: boolean;
   queue: Song[];
   currentIndex: number;
 
@@ -12,6 +13,7 @@ interface PlayerStore {
   playAlbum: (songs: Song[], startIndex?: number) => void;
   setCurrentSong: (song: Song | null) => void;
   togglePlay: () => void;
+  playAgain: () => void;
   playNext: () => void;
   playPrevious: () => void;
 }
@@ -19,6 +21,7 @@ interface PlayerStore {
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
   currentSong: null,
   isPlaying: false,
+  isOnRepeat: false,
   queue: [],
   currentIndex: -1,
 
@@ -86,6 +89,25 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
     set({
       isPlaying: willStartPlaying,
+    });
+  },
+
+  playAgain: () => {
+    const currentSongPlaying = get().currentSong;
+    if (!currentSongPlaying) return;
+
+    const socket = useChatStore.getState().socket;
+    if (socket.auth) {
+      socket.emit("update_activity", {
+        userId: socket.auth.userId,
+        activity: `Playing ${currentSongPlaying.title} by ${currentSongPlaying.artist}`,
+      });
+    }
+
+    set({
+      currentSong: currentSongPlaying,
+      isPlaying: true,
+      isOnRepeat: true,
     });
   },
 

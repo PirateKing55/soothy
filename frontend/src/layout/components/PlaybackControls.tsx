@@ -11,12 +11,14 @@ const formatTime = (seconds: number) => {
 };
 
 export const PlaybackControls = () => {
-	const { currentSong, isPlaying, togglePlay, playNext, playPrevious } = usePlayerStore();
+	const { currentSong, isPlaying, togglePlay, playNext, playPrevious, isOnRepeat } = usePlayerStore();
 
 	const [volume, setVolume] = useState(75);
 	const [currentTime, setCurrentTime] = useState(0);
 	const [duration, setDuration] = useState(0);
 	const audioRef = useRef<HTMLAudioElement | null>(null);
+	const [isRepeat, setIsRepeat] = useState(isOnRepeat);
+	const [isShuffle, setIsShuffle] = useState(false);
 
 	useEffect(() => {
 		audioRef.current = document.querySelector("audio");
@@ -49,6 +51,12 @@ export const PlaybackControls = () => {
 		}
 	};
 
+	const handleRepeat = () => {
+		usePlayerStore.setState({ isOnRepeat: !isRepeat });
+		setIsRepeat(!isRepeat);
+	}
+
+
 	return (
 		<footer className='h-20 sm:h-24 bg-zinc-900 border-t border-zinc-800 px-4'>
 			<div className='flex justify-between items-center h-full max-w-[1800px] mx-auto'>
@@ -80,8 +88,10 @@ export const PlaybackControls = () => {
 							size='icon'
 							variant='ghost'
 							className='hidden sm:inline-flex hover:text-white text-zinc-400'
+							onClick={() => setIsShuffle(!isShuffle)}
+							disabled={!currentSong}
 						>
-							<Shuffle className='h-4 w-4' />
+							{isShuffle ? <Shuffle className='h-4 w-4 text-green-400' /> : <Shuffle className='h-4 w-4' />}
 						</Button>
 
 						<Button
@@ -115,8 +125,10 @@ export const PlaybackControls = () => {
 							size='icon'
 							variant='ghost'
 							className='hidden sm:inline-flex hover:text-white text-zinc-400'
+							onClick={handleRepeat}
+							disabled={!currentSong}
 						>
-							<Repeat className='h-4 w-4' />
+							{isRepeat ? <Repeat className='h-4 w-4 text-green-400' /> : <Repeat className='h-4 w-4' />}
 						</Button>
 					</div>
 
@@ -134,7 +146,7 @@ export const PlaybackControls = () => {
 				</div>
 				{/* volume controls */}
 				<div className='hidden sm:flex items-center gap-4 min-w-[180px] w-[30%] justify-end'>
-					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
+					{/* <Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
 						<Mic2 className='h-4 w-4' />
 					</Button>
 					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
@@ -142,7 +154,7 @@ export const PlaybackControls = () => {
 					</Button>
 					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
 						<Laptop2 className='h-4 w-4' />
-					</Button>
+					</Button> */}
 
 					<div className='flex items-center gap-2'>
 						<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
